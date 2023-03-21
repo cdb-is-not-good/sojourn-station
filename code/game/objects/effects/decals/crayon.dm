@@ -5,6 +5,7 @@
 	layer = TURF_DECAL_LAYER
 	anchored = TRUE
 	random_rotation = 0
+	sanity_damage = 4
 	var/is_rune = FALSE
 
 /obj/item/stack/thrown/crayons
@@ -80,7 +81,78 @@
 	add_hiddenprint(usr)
 
 //various items and doo-dads
-/obj/item/device/camera/crayon_mage // used in admin testing so I don't have to constantly var edit myself to be nearsighted
+ //the pouch of wonderful single item sharing!
+/obj/item/crayon_pouch
+	name = "crayon pouch"
+	desc = "What seems to be a normal crayon box has turned into something far more strange."
+	icon = 'icons/obj/dice.dmi'
+	icon_state = "magicdicebag"
+	price_tag = 100
+	w_class = ITEM_SIZE_SMALL
+	matter = list(MATERIAL_BIOMATTER = 12)
+	attack_verb = list("pouched")
+
+	var/obj/item/storage/heldbag = null
+	var/master_bag = FALSE
+
+/obj/item/crayon_pouch/Initialize(mapload)
+	for(var/obj/item/crayon_pouch/linker in world)
+		heldbag = linker.heldbag
+	if(!heldbag && !master_bag)
+		heldbag = new /obj/item/storage/pouch/medium_generic/crayon_linker(src)
+		master_bag = TRUE
+
+/obj/item/crayon_pouch/attackby(obj/item/W as obj, mob/user as mob)
+	if(heldbag)
+		heldbag.refresh_all()
+		heldbag.close_all()
+		return heldbag.attackby(W, user)
+	else
+		to_chat(user, SPAN_WARNING("The crayon pouch refuses to open."))
+		return
+
+/obj/item/crayon_pouch/AltClick(mob/user)
+	if(!heldbag)
+		to_chat(user, SPAN_WARNING("The crayon pouch refuses to open."))
+		return
+	return heldbag.AltClick(user)
+
+/obj/item/crayon_pouch/attack_self(mob/user as mob)
+	if(!heldbag)
+		to_chat(user, SPAN_WARNING("The crayon box refuses to open."))
+		return
+	return heldbag.attack_self(user)
+
+/obj/item/crayon_pouch/throw_at(mob/user)
+	if(heldbag)
+		heldbag.close_all()
+	..()
+
+/obj/item/crayon_pouch/Destroy()
+	heldbag.close_all()
+	if(master_bag)
+		for(var/obj/item/crayon_pouch/linker in world)
+			linker.heldbag = null
+		master_bag = FALSE
+		qdel(heldbag)
+	else
+		heldbag = null
+	contents = null
+	. = ..()
+
+/obj/item/storage/pouch/medium_generic/crayon_linker //the special storage pouch that all the crayon pouches link to.
+
+/obj/item/storage/pouch/medium_generic/crayon_linker/storage_depth_turf()
+	return -1 //Were always going to be accessable throught dept as this is meant for nested items
+
+/obj/item/storage/pouch/medium_generic/crayon_linker/attack_self(mob/user as mob)
+	open(user)
+
+/obj/item/storage/pouch/medium_generic/crayon_linker/Adjacent()
+	return TRUE
+
+// used in admin testing so I don't have to constantly var edit myself to be nearsighted
+/obj/item/device/camera/crayon_mage
 	desc = "why is the light on the back?"
 	name = "camera"
 	pictures_left = 0
@@ -95,7 +167,8 @@
 		playsound(loc, pick('sound/items/polaroid1.ogg', 'sound/items/polaroid2.ogg'), 75, 1, -3)
 		user.disabilities|=NEARSIGHTED
 
-/obj/structure/sink/basion/crayon //BLOOD FONT!
+ //BLOOD FONT!
+/obj/structure/sink/basion/crayon
 	name = "blood basion"
 	desc = "A deep basin of polished stone that forever fills with gore."
 	icon_state = "BaptismFont_Water"
@@ -233,6 +306,7 @@ obj/item/scroll/attackby(obj/item/I, mob/living/carbon/human/M)
 					mage_candle.light(flavor_text = SPAN_NOTICE("\The [name] lights up."))
 					mage_candle.endless_burn = TRUE
 					B.remove_self(15)
+					M.sanity.changeLevel(-5)
 					to_chat(M, "<span class='info'>A candle is lit by forces unknown...</span>")
 				candle_amount += 1
 
@@ -291,6 +365,10 @@ obj/item/scroll/attackby(obj/item/I, mob/living/carbon/human/M)
 
 				if(spell.message == "Scribe." && candle_amount >= 7)
 					scribe_spell(M)
+					continue
+
+				if(spell.message == "Pouch." && candle_amount >= 2)
+					pouch_spell(M)
 					continue
 			return
 
@@ -396,6 +474,7 @@ obj/item/scroll/attackby(obj/item/I, mob/living/carbon/human/M)
 	M.health -= 20
 	B.remove_self(50)
 	M.unnatural_mutations.total_instability += 15
+	M.sanity.changeLevel(-5)
 	return
 
 /obj/effect/decal/cleanable/crayon/proc/ignorance_spell(mob/living/carbon/human/M)
@@ -405,6 +484,7 @@ obj/item/scroll/attackby(obj/item/I, mob/living/carbon/human/M)
 	M.maxHealth -= 5
 	M.health -= 5
 	B.remove_self(50)
+	M.sanity.changeLevel(-35)
 	return
 
 /obj/effect/decal/cleanable/crayon/proc/life_spell(mob/living/carbon/human/M)
@@ -422,6 +502,7 @@ obj/item/scroll/attackby(obj/item/I, mob/living/carbon/human/M)
 			M.maxHealth -= 25
 			M.health -= 25
 			B.remove_self(70)
+			M.sanity.changeLevel(-10)
 			return
 		return
 
@@ -437,6 +518,7 @@ obj/item/scroll/attackby(obj/item/I, mob/living/carbon/human/M)
 			M.maxHealth -= 25
 			M.health -= 25
 			B.remove_self(50)
+			M.sanity.changeLevel(-10)
 			return
 		return
 	return
@@ -448,6 +530,7 @@ obj/item/scroll/attackby(obj/item/I, mob/living/carbon/human/M)
 	M.health -= 5
 	B.remove_self(20)
 	M.sanity.breakdown(TRUE)
+	M.sanity.changeLevel(30)
 	return
 
 /obj/effect/decal/cleanable/crayon/proc/sight_spell(mob/living/carbon/human/M)
@@ -455,6 +538,7 @@ obj/item/scroll/attackby(obj/item/I, mob/living/carbon/human/M)
 	to_chat(M, "<span class='warning'>Your vision is impaired no more, your heart stresses itself to recover the blood paid for your blinding to the dark arts. The eyes deceive, true perception will be achieved without their hindrance.</span>")
 	M.disabilities &= ~NEARSIGHTED
 	B.remove_self(150)
+	M.sanity.changeLevel(30)
 	return
 
 /obj/effect/decal/cleanable/crayon/proc/paradox_spell(mob/living/carbon/human/M)
@@ -466,6 +550,7 @@ obj/item/scroll/attackby(obj/item/I, mob/living/carbon/human/M)
 	M.sanity.breakdown(TRUE)
 	sleep(30)
 	explosion(loc, 3, 5, 7, 5)
+	M.sanity.changeLevel(100)
 	return
 
 /obj/effect/decal/cleanable/crayon/proc/end_spell(mob/living/carbon/human/M)
@@ -476,6 +561,7 @@ obj/item/scroll/attackby(obj/item/I, mob/living/carbon/human/M)
 	M.disabilities &= ~NEARSIGHTED
 	B.remove_self(150)
 	M.sanity.breakdown(TRUE)
+	M.sanity.changeLevel(5)
 	for(var/datum/language/L in M.languages)
 		if(L.name == LANGUAGE_CULT)
 			M.remove_language(LANGUAGE_CULT)
@@ -491,7 +577,7 @@ obj/item/scroll/attackby(obj/item/I, mob/living/carbon/human/M)
 	GLOB.bluespace_hazard_threshold -= 1
 	bluespace_entropy(1, get_turf(src), TRUE)
 	B.remove_self(50)
-	M.sanity.breakdown(TRUE) //You have to be insain to do this
+	M.sanity.changeLevel(15)
 	for(var/datum/language/L in M.languages)
 		if(L.name == LANGUAGE_CULT)
 			my_area.bluespace_hazard_threshold -= 5
@@ -511,6 +597,7 @@ obj/item/scroll/attackby(obj/item/I, mob/living/carbon/human/M)
 	GLOB.bluespace_hazard_threshold += 1
 	bluespace_entropy(-5, get_turf(src), TRUE)
 	B.remove_self(60) //Takes more to heal then harm
+	M.sanity.changeLevel(-15)
 	for(var/datum/language/L in M.languages)
 		if(L.name == LANGUAGE_CULT)
 			my_area.bluespace_hazard_threshold += 5
@@ -529,6 +616,7 @@ obj/item/scroll/attackby(obj/item/I, mob/living/carbon/human/M)
 	B.remove_self(50)
 	M.metabolism_effects.nsa_bonus -= 25 //Works to balance out the NSA given from the perk. That way those who get it naturally have a bonus.
 	M.stats.addPerk(PERK_ALCHEMY)
+	M.sanity.changeLevel(15)
 	to_chat(M, "<span class='warning'>Your mind expands with creations lost. Your body feels sick.</span>")
 	return
 
@@ -541,6 +629,7 @@ obj/item/scroll/attackby(obj/item/I, mob/living/carbon/human/M)
 		var/obj/item/alchemy/recipe_scroll/S = new /obj/item/alchemy/recipe_scroll
 		S.loc = P.loc
 		qdel(P)
+		M.sanity.changeLevel(-2)
 	return
 
 /obj/effect/decal/cleanable/crayon/proc/bees_spell(mob/living/carbon/human/M)
@@ -548,12 +637,13 @@ obj/item/scroll/attackby(obj/item/I, mob/living/carbon/human/M)
 	M.maxHealth -= 10
 	M.health -= 10
 	to_chat(M, "<span class='info'>To make life from dyes, takes carbon...</span>")
-	for(var/obj/item/reagent_containers/food/snacks/grown/G in oview(5)) // Must be on the spell circle
+	for(var/obj/item/reagent_containers/food/snacks/grown/G in oview(5))
 		to_chat(M, "<span class='info'>Distant voices call out from everywhere. NOT THE BEES!</span>")
 		B.remove_self(70)
 		if(G.name == "sunflower")
 			new /mob/living/carbon/superior_animal/vox/wasp(G.loc)
 			qdel(G)
+		M.sanity.changeLevel(4)
 	return
 
 /obj/effect/decal/cleanable/crayon/proc/scribe_spell(mob/living/carbon/human/M)
@@ -562,7 +652,18 @@ obj/item/scroll/attackby(obj/item/I, mob/living/carbon/human/M)
 	M.health -= 25
 	B.remove_self(100)
 	M.stats.addPerk(PERK_SCRIBE)
+	M.sanity.changeLevel(20)
 	to_chat(M, "<span class='warning'>In a single moment your vision vanishes. The understanding of scrolls fills your mind.</span>")
+	return
+
+/obj/effect/decal/cleanable/crayon/proc/pouch_spell(mob/living/carbon/human/M)
+	var/datum/reagent/organic/blood/B = M.get_blood()
+	for(var/obj/item/storage/pill_bottle/dice/frodo in oview(1))
+		B.remove_self(50)
+		M.sanity.changeLevel(-50) //not always going to break you. But will tank your sanity.
+		to_chat(M, "<span class='warning'>The dice bag gives a loud pop.</span>")
+		new /obj/item/crayon_pouch(frodo.loc)
+		qdel(frodo)
 	return
 
 //ritual knife spell procs
@@ -573,6 +674,7 @@ obj/item/scroll/attackby(obj/item/I, mob/living/carbon/human/M)
 	M.maxHealth -= 20
 	M.health -= 20
 	B.remove_self(50)
+	M.sanity.changeLevel(-20)
 	M.unnatural_mutations.total_instability += 15
 	return
 
@@ -586,6 +688,7 @@ obj/item/scroll/attackby(obj/item/I, mob/living/carbon/human/M)
 			M.unnatural_mutations.total_instability += 1 //A soft cap
 		B.remove_self(70)
 		greater.dust()
+		M.sanity.changeLevel(-20)
 		return
 
 	for(var/mob/living/simple_animal/lesser in oview(1))
@@ -596,6 +699,7 @@ obj/item/scroll/attackby(obj/item/I, mob/living/carbon/human/M)
 			M.unnatural_mutations.total_instability += 1 //A soft cap
 		B.remove_self(70)
 		lesser.dust()
+		M.sanity.changeLevel(-20)
 		return
 	return
 
@@ -605,6 +709,7 @@ obj/item/scroll/attackby(obj/item/I, mob/living/carbon/human/M)
 	for(var/obj/item/device/camera_film in oview(1)) // Must be on the spell circle
 		B.remove_self(15)
 		new /obj/random/card_carp(src.loc)
+		M.sanity.changeLevel(-3)
 	return
 
 /obj/effect/decal/cleanable/crayon/proc/cards_to_life_spell(mob/living/carbon/human/M)
@@ -612,6 +717,7 @@ obj/item/scroll/attackby(obj/item/I, mob/living/carbon/human/M)
 	var /mob/living/simple_animal/simplemob = /mob/living/simple_animal/hostile/creature
 	var /mob/living/carbon/superior_animal/superiormob = null
 	for(var/obj/item/card_carp/carpy in oview(1))
+		M.sanity.changeLevel(1)
 		to_chat(M, "<span class='warning'>The card rotates 90 degrees then begins to fold, twisting till it breaks open with a ripping sound.</span>")
 		B.remove_self(50)
 		//nonhostile mobs. The pets of the colony.
@@ -665,6 +771,7 @@ obj/item/scroll/attackby(obj/item/I, mob/living/carbon/human/M)
 			diggy_hole.isRevealed = TRUE
 			diggy_hole.isSealed = FALSE
 			diggy_hole.invisibility = 0
+			diggy_hole.collapse()
 			qdel(carpy)
 			return
 
@@ -717,6 +824,7 @@ obj/item/scroll/attackby(obj/item/I, mob/living/carbon/human/M)
 			else T.vessel.add_reagent("blood", (bloodpercent - (T.get_blood_volume() * 0.01)) * T.species.blood_volume)
 			to_chat(T, "<span class='warning'>You feel extremly woozy and light headed for a second. It partially recovers.</span>")
 
+		M.sanity.changeLevel(-5) //Good deads always get punished
 	//caster blood handling below
 	to_chat(M, "<span class='warning'>The sound of a heart beat fills the air around you.</span>")
 	if(M.get_blood_volume() < bloodpercent)
@@ -733,12 +841,14 @@ obj/item/scroll/attackby(obj/item/I, mob/living/carbon/human/M)
 			return
 		new /obj/item/scroll(src.loc)
 		qdel(target)
+		M.sanity.changeLevel(-5)
 	for(var/mob/living/simple_animal/target in oview(1))
 		B.remove_self(50)
 		if(target.stat != DEAD)
 			return
 		new /obj/item/scroll(src.loc)
 		qdel(target)
+		M.sanity.changeLevel(-5)
 	return
 
 //start of scroll spells here!
