@@ -11,6 +11,7 @@
 	metabolism = REM * 0.05 // 0.01 by default. They last a while and slowly kill you.
 	var/sanityloss = 0
 	var/strength = 1		// Base CE_TOXIN magnitude, multiplied by effect multiplier
+	var/target_organ //which organ will be affectedf
 	reagent_type = "Toxin"
 	scannable = TRUE
 	nerve_system_accumulations = 35 //Baseline toxin is going to heck you up
@@ -100,16 +101,36 @@
 
 ///datum/reagent/toxin/blattedin is defined in blattedin.dm
 
-/datum/reagent/toxin/plasma
+/datum/reagent/toxin/plasma/
 	name = "Plasma"
 	id = "plasma"
 	description = "Plasma in its liquid form."
 	taste_mult = 1.5
 	reagent_state = LIQUID
 	color = "#9D14DB"
-	strength = 3
+	strength = 10 //it's fucking plasma.
 	touch_met = 5
-	nerve_system_accumulations = 75 //Burning your insides
+	nerve_system_accumulations = 100 //Burning your insides
+
+/datum/reagent/toxin/plasma/affect_blood(mob/living/carbon/M, alien, effect_multiplier) //injected plasma spreads through the body, poisoning the victim badly.
+	to_chat(M, SPAN_DANGER("Your veins are on fire!"))
+	M.add_chemical_effect(CE_TOXIN, effect_multiplier) //Healing stops till plasma is removed
+	M.adjustFireLoss(rand(0,1) * effect_multiplier)
+	M.adjustToxLoss(rand(0,0.5) * effect_multiplier)
+	if(ishuman(M))
+		obj/item/organ/internal/blood_vessel/user_vessel = user.random_organ_by_process(OP_BLOOD_VESSEL)
+		add_wound(user_vessel, user, /datum/component/internal_wound/organic/heavy_poisoning, "toxin contamination")
+
+/datum/reagent/toxin/plasma/affect_ingest(mob/living/carbon/M, alien, effect_multiplier) //ingested plasma causes chemical burns on the outside same as it does the inside.
+	to_chat(M, SPAN_DANGER("You feel as though you've swallowed fire!"))
+	M.add_chemical_effect(CE_TOXIN, effect_multiplier) //Healing stops till plasma is removed
+	M.adjustFireLoss(rand(0,1) * effect_multiplier)
+	M.adjustToxLoss(rand(0,0.5) * effect_multiplier)
+	if(ishuman(M))
+		var/mob/living/carbon/human/H = M
+		var/obj/item/organ/internal/N = H.random_organ_by_process(OP_STOMACH)
+		add_wound(N, M, /datum/component/internal_wound/organic/burn)
+
 
 /datum/reagent/toxin/plasma/touch_mob(mob/living/L, var/amount)
 	if(istype(L))
