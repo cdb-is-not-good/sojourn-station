@@ -71,15 +71,19 @@
 		return
 	eyes_color = owner.eyes_color
 
-/obj/item/organ/internal/eyes/take_damage(amount, damage_type = BRUTE, wounding_multiplier = 1, sharp = FALSE, edge = FALSE, silent = FALSE)
+/obj/item/organ/internal/eyes/take_damage(amount, damage_type = BRUTE, wounding_multiplier = 1, silent = FALSE, sharp = FALSE, edge = FALSE)
 	var/oldbroken = is_broken()
 	..()
 	if(is_broken() && !oldbroken && owner && !owner.stat)
 		to_chat(owner, SPAN_DANGER("You go blind!"))
 
+/obj/item/organ/internal/eyes/proc/get_colourmatrix() //Returns a special colour matrix if the mob is colourblind, otherwise it uses the current one.
+	if(owner.stats.getPerk(PERK_OBORIN_SYNDROME) && !owner.is_dead())
+		return colourblind_matrix
+	else
+		return colourmatrix
 
-//Subtypes obsoleted by the heterochromia marking.
-
+//Subtypes
 /obj/item/organ/internal/eyes/oneeye
 	icon_state = "eye_l"
 	cache_key = "left_eye"

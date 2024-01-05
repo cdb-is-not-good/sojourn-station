@@ -135,8 +135,7 @@ var/global/list/organ_tag_to_name = list(
 	chest2= "back", heart = "heart",
 	lungs  = "lungs", liver = "liver",
 	"left kidney" = "left kidney", "right kidney" = "right kidney",
-	stomach = "stomach", brain = "brain",
-	back  = "back"
+	stomach = "stomach", brain = "brain"
 	)
 
 // Boss spawners
