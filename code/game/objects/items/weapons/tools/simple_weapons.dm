@@ -53,6 +53,9 @@
 	worksound = WORKSOUND_HARD_SLASH
 	price_tag = 30
 
+/obj/item/tool/hatchet/robo //for the service borg
+	embed_mult = 0
+
 /obj/item/tool/fireaxe
 	name = "fire axe"
 	desc = "Truly, the weapon of a madman. Who would think to fight fire with an axe?"
@@ -157,6 +160,7 @@
 	desc = "A sharp and curved blade on a long fiber-metal handle, this tool makes it easy to reap what you sow."
 	icon = 'icons/obj/weapons.dmi'
 	icon_state = "scythe0"
+	item_state = "scythe0"
 	matter = list(MATERIAL_PLASTEEL = 7, MATERIAL_PLASTIC = 3)
 	sharp = TRUE
 	edge = TRUE
@@ -431,7 +435,7 @@
 	desc = "A long, thin bladed sword with a weaponized destructive analyzer integrated into the blade. At the moment of its victim's death it is able to deconstruct them and wirelessly transmit data to internal research database."
 	icon = 'icons/obj/weapons-blades.dmi'
 	icon_state = "rapier_cro" //Sprite by Gidgit
-	item_state = "saber"
+	item_state = "rapiersci"
 	force = WEAPON_FORCE_PAINFUL - 5 //10 base
 	armor_penetration = ARMOR_PEN_MODERATE
 	price_tag = 1600
@@ -446,6 +450,8 @@
 	matter = null //magicium
 	clickdelay_offset = -4 //DEFAULT_QUICK_COOLDOWN = 4 so we offset are weapon to quick
 	var/datum/component/rnd_points/point_holder
+	degradation = 0.4 //Used a lot
+	embed_mult = 0
 
 /obj/item/tool/sword/saber/deconstuctive_rapier/New()
 	..()
@@ -479,7 +485,7 @@
 	desc = "A long, thin bladed sword with a hollow chamber in the blade. A mechanical release mechanism allows the wielder to inject targets with fluid from a reservoir in the grip."
 	icon = 'icons/obj/weapons-blades.dmi' //Sprite by Gidgit
 	icon_state = "rapier_cbo"
-	item_state = "saber"
+	item_state = "rapiermed"
 	force = WEAPON_FORCE_PAINFUL - 5 //10 base
 	armor_penetration = ARMOR_PEN_MODERATE
 	price_tag = 1600
@@ -493,6 +499,14 @@
 	reagent_flags = INJECTABLE|TRANSPARENT
 	matter = null //magicium
 	clickdelay_offset = -4 //DEFAULT_QUICK_COOLDOWN = 4 so we offset are weapon to quick
+	degradation = 0.4 //Used a lot
+	var/max_reagents = 30
+	embed_mult = 0
+
+/obj/item/tool/sword/saber/injection_rapier/refresh_upgrades()
+	..()
+	if(reagents)
+		reagents.maximum_volume = max_reagents
 
 /obj/item/tool/sword/saber/injection_rapier/New()
 	..()

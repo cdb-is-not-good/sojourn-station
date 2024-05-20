@@ -147,6 +147,12 @@ Turf and target are seperate in case you want to teleport some distance from a t
 	return destination
 
 
+/proc/ennumeratemobs()
+	var/i
+	var/mobnum
+	for(i=1, i<world.maxz, i++)
+		mobnum = SSmobs.mob_living_by_zlevel[i].len
+		to_chat(usr, "Z-level [i] has [mobnum] mobs on it")
 
 /proc/LinkBlocked(turf/A, turf/B)
 	if(A == null || B == null) return 1
@@ -314,8 +320,8 @@ Turf and target are seperate in case you want to teleport some distance from a t
 
 
 //Generalised helper proc for letting mobs rename themselves. Used to be clname() and ainame()
-//Last modified by Carn
-/mob/proc/rename_self(var/role, var/allow_numbers=0)
+//Last modified by Carn and Lamasmaster
+/mob/proc/rename_self(var/role, var/allow_numbers=TRUE)
 	spawn(0)
 		var/oldname = real_name
 

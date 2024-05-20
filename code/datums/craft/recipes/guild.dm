@@ -97,8 +97,22 @@
 		list(QUALITY_SAWING, 30, "time" = 60)
 	)
 
-/datum/craft_recipe/guild/robotmelee //Lots of steps
-	name = "robot mark v armor plating"
+/datum/craft_recipe/guild/robotmelee //Lots of heating and hammering. Forge your blade samurai.
+	name = "robot mark III reinforced armor plating"
+	result = /obj/item/robot_parts/robot_component/armour/mkiii
+	steps = list(
+		list(CRAFT_MATERIAL, 25, MATERIAL_STEEL, "time" = 30),
+		list(QUALITY_WELDING, 40, "time" = 90),
+		list(QUALITY_HAMMERING, 30, "time" = 180),
+		list(QUALITY_WELDING, 40, "time" = 90),
+		list(QUALITY_HAMMERING, 30, "time" = 180),
+		list(QUALITY_WELDING, 40, "time" = 90),
+		list(QUALITY_SCREW_DRIVING, 40, "time" = 90),
+		list(QUALITY_CUTTING, 30, "time" = 180),
+	)
+
+/datum/craft_recipe/guild/robothp //Lots of steps
+	name = "robot mark v extra armor plating"
 	result = /obj/item/robot_parts/robot_component/armour/mkv
 	steps = list(
 		list(CRAFT_MATERIAL, 10, MATERIAL_PLASTEEL, "time" = 90),
@@ -765,7 +779,26 @@
 		list(QUALITY_SCREW_DRIVING, 40, "time" = 90),
 		list(QUALITY_WELDING, 40, "time" = 90)
 	)
-
+/*
+Thee would be able to smith tho
+tis my failing
+My deeplest sorrow for this keepsake of the rnd's hoard
+- Trilby, a SI main (somehow)
+/datum/craft_recipe/guild/autolathe_industrial
+	name = "Circuit: Industrial Autolathe"
+	result = /obj/item/circuitboard/autolathe_industrial
+	icon_state = "electronic"
+	steps = list(
+		list(/obj/item/computer_hardware/processor_unit, 2, "time" = 30),
+		list(CRAFT_MATERIAL, 1, MATERIAL_GOLD),
+		list(CRAFT_MATERIAL, 1, MATERIAL_SILVER),
+		list(/obj/item/circuitboard/autolathe, 1, "time" = 30),
+		list(/obj/item/stack/cable_coil, 5, "time" = 20),
+		list(CRAFT_MATERIAL, 2, MATERIAL_GLASS),
+		list(QUALITY_SCREW_DRIVING, 40, "time" = 40),
+		list(QUALITY_WELDING, 40, "time" = 20)
+	)
+*/
 /datum/craft_recipe/guild/matter_nanoforge
 	name = "Circuit: Matter Nano-Forge"
 	result = /obj/item/circuitboard/matter_nanoforge
