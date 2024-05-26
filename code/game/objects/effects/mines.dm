@@ -156,3 +156,38 @@
 	..()
 	pixel_x = 0
 	pixel_y = 0
+
+
+//environmental traps
+
+/obj/item/weak_floor_trap
+	name = "fatigued terrain"
+	desc = "A particularly strained section of terrain, doesn't appear very stable..."
+	density = 0
+	anchored = 1
+	icon = 'icons/turf/flooring/decals.dmi'
+	icon_state = "rust10"
+	var/triggerproc = "collapse" //name of the proc thats called when the mine is triggered
+	var/triggered = 0
+	layer = HIDE_LAYER
+
+/obj/item/weak_floor_trap/New()
+	..()
+	pixel_x = -16
+	pixel_y = -12
+
+/obj/item/weak_floor_trap/Crossed(mob/M as mob|obj)
+	if(triggered) return
+
+	if(ishuman(M))
+		M.visible_message("<span class='warning'>The floor suddenly gives way beneath [M]!</span>", \
+						  "<span class='warning'>The floor collapses beneath your feet, sending you hurtling to the level below!</span>")
+		triggered = 1
+		call(src,triggerproc)(M)
+
+/obj/item/weak_floor_trap/proc/collapse(var/mob/living/M)
+	triggered = 1
+	playsound(src.loc, 'sound/effects/collapse.ogg', 300, 1)
+	M.Weaken(5)
+	new /turf/simulated/open (src.loc)
+	qdel(src)
