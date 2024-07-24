@@ -837,7 +837,6 @@
 	armor_divisor = 1.5
 	embed = FALSE
 	sharp = FALSE
-	wounding_mult = WOUNDING_WIDE
 	step_delay = 1.65
 	affective_damage_range = 5
 	affective_ap_range = 2
@@ -1101,9 +1100,9 @@
 /obj/item/projectile/bullet/crossbow_bolt
 	name = "bolt"
 	icon_state = "bolt"
-	damage_types = list(BRUTE = 22)
-	wounding_mult = WOUNDING_SMALL //Relatively small entry wound and straight impale.
-	armor_divisor = 1.5
+	damage_types = list(BRUTE = 25)
+	wounding_mult = WOUNDING_SERIOUS //decent but won't like armor
+	armor_divisor = 1.3
 	knockback = 0 //Bug doups hits
 	supereffective_types = list(/mob/living/carbon/human = FALSE, /mob/living = TRUE)
 	supereffective_mult = 1.5
@@ -1115,8 +1114,8 @@
 /obj/item/projectile/bullet/crossbow_bolt/lethal
 	name = "bolt"
 	icon_state = "bolt"
-	damage_types = list(BRUTE = 15)
-	wounding_mult = WOUNDING_NORMAL //slightly bigger
+	damage_types = list(BRUTE = 30)
+	wounding_mult = WOUNDING_WIDE //slightly bigger
 	armor_divisor = 0.5
 	supereffective_types = list(/mob/living/carbon/human = FALSE, /mob/living = TRUE)
 	supereffective_mult = 1.5
@@ -1126,7 +1125,7 @@
 /obj/item/projectile/bullet/crossbow_bolt/hv
 	name = "bolt"
 	icon_state = "bolt"
-	damage_types = list(BRUTE = 15)
+	damage_types = list(BRUTE = 20)
 	armor_divisor = 3
 	penetrating = 3
 	hitscan = TRUE
